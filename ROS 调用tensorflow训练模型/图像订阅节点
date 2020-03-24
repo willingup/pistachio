@@ -1,0 +1,78 @@
+#!/usr/bin/python2.7
+import rospy
+import numpy as np
+import tensorflow as tf
+import cv2
+import matplotlib.pyplot as plt
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+from tensorflow.python.framework import graph_util
+from skimage import io, transform
+ 
+ 
+label_to_colours =   {0: [0, 0, 0], 
+                     1: [0, 0, 128],
+                     2: [0, 128, 0],
+                     3: [0, 128, 128],
+                     4: [128, 0, 0],
+                     5: [55, 128, 128],
+                     6: [128, 128, 192],
+                     7: [128, 64, 64],
+                     8: [128, 0, 64],
+                     9: [0, 64, 64],
+                     10: [192, 128, 0],
+                     11: [128, 128, 128]}
+pb_file = '../include/real_time_image_seg/enet_model.pb'
+ 
+def grayscale_to_colour(image):
+    image = image.reshape((360, 640, 1))
+    image = np.repeat(image, 3, axis=-1)
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            label = int(image[i][j][0])
+            image[i][j] = np.array(label_to_colours[label])
+    return image
+ 
+def preprocess(image, height=360, width=640):
+    image.astype('float32')
+    img = np.reshape(image,[2,height,width,3])
+ 
+    return img
+ 
+def callback(data): 
+    global count,bridge
+    count = count + 1
+    if count == 1:
+        count = 0
+        cv_img = bridge.imgmsg_to_cv2(data, "bgr8")
+    with tf.Session() as sess: # 下面开始做分割
+        tf.global_variables_initializer().run()
+        output_graph_def = tf.GraphDef()
+        with open(pb_file,'rb') as f:
+            output_graph_def.ParseFromString(f.read())
+            _ = tf.import_graph_def(output_graph_def,name="")
+        input_node = sess.graph.get_tensor_by_name('raw_input:0')
+        image = cv_img[120:,:,:] # 这里是因为需要把图像截断了，输入变成了640*360
+        print("[info]Now running semantic segmentation..")
+        image = transform.resize(image,(360,640,3))
+        image.astype('float32')
+        result = sess.run('predictions:0', feed_dict={input_node:np.reshape(image,[1,360,640,3])})
+        labeled_image = grayscale_to_colour(result)
+        cv2.imshow("frame" , labeled_image)
+        cv2.waitKey(3) # 至此分割完毕，这个节点同实时显示分割画面
+        labeled_image = bridge.cv2_to_imgmsg(labeled_image, encoding='passthrough')
+        print(type(labeled_image))
+        pub = rospy.Publisher('camera/seg_raw', Image, queue_size=2)
+        pub.publish(labeled_image) # 定义了发布话题的功能，再把分割的结果发布出去
+ 
+def displaycamera():
+    rospy.init_node('image_seg', anonymous=True)
+ 
+    global count,bridge
+    count = 0
+    bridge = CvBridge()
+    rospy.Subscriber('camera/image_raw', Image, callback)
+    rospy.spin()
+ 
+if __name__ == '__main__':
+    displaycamera()
