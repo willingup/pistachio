@@ -1,0 +1,47 @@
+#资料
+#CvBridge是一个ROS库，提供ROS和OpenCV之间的接口
+
+#!/usr/bin/env python
+import cv2
+import rospy
+import torch
+import numpy as np
+import torch.nn as nn
+from tqdm import tqdm
+from std_msgs.msg import Float64
+from sensor_msgs.msg import Image
+from driving_model import Beta_model
+from cv_bridge import CvBridge,CvBridgeError
+
+
+def prediction(data): #data传入的图像数据
+    global bridge,pub,model,device
+    cv_img = bridge.imgmsg_to_cv2(data,"bgr8") #要将ROS图像消息转换为cv :: Mat
+    cv_img = cv2.resize(cv_img,(560,720)) #图像的缩放，cv_img是原图，（560,720）是目标大小
+    
+    img_tensor = torch.from_numpy(cv_img)
+    img_tensor = img_tensor.view(img_tensor.size()[2],img_tensor.size()[0],img_tensor.size()[1])
+    img_tensor = img_tensor.unsqueeze(0)
+    
+    output_tensor = model(img_tensor)
+    angle = output_tensor.item()
+    pub.publish(angle)
+
+def main_process():
+    global bridge,pub,model,device
+    bridge = CvBridge() 
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    model = Beta_model()
+    model.to(device)
+    model.eval()
+    model.load_state_dict(torch.load('你的权重文件'))
+    rospy.init_node('end_to_end', anonymous=True)
+    pub = rospy.Publisher('end_to_end_prediction',Float64, queue_size=10)
+    rospy.Subscriber('new_camera/left_image',Image,prediction)
+    rospy.spin()
+
+if __name__ == '__main__':
+    try:
+        main_process()
+    except rospy.ROSInterruptException:
+        pass
