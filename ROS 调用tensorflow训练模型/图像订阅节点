@@ -1,3 +1,4 @@
+#做实时语义分割
 #!/usr/bin/python2.7
 import rospy
 import numpy as np
@@ -11,7 +12,7 @@ from cv_bridge import CvBridge, CvBridgeError
 from tensorflow.python.framework import graph_util
 from skimage import io, transform
  
- 
+#可能是标签
 label_to_colours =   {0: [0, 0, 0], 
                      1: [0, 0, 128],
                      2: [0, 128, 0],
@@ -57,6 +58,7 @@ def callback(data):
         input_node = sess.graph.get_tensor_by_name('raw_input:0')
         image = cv_img[120:,:,:] # 这里是因为需要把图像截断了，输入变成了640*360
         print("[info]Now running semantic segmentation..")
+        
         image = transform.resize(image,(360,640,3))
         image.astype('float32')
         result = sess.run('predictions:0', feed_dict={input_node:np.reshape(image,[1,360,640,3])})
@@ -65,8 +67,10 @@ def callback(data):
         cv2.waitKey(3) # 至此分割完毕，这个节点同实时显示分割画面
         labeled_image = bridge.cv2_to_imgmsg(labeled_image, encoding='passthrough')
         print(type(labeled_image))
+        
         pub = rospy.Publisher('camera/seg_raw', Image, queue_size=2)
-        pub.publish(labeled_image) # 定义了发布话题的功能，再把分割的结果发布出去
+        pub.publish(labeled_image) 
+        # 定义了发布话题的功能，再把分割的结果发布出去
  
 def displaycamera():
     rospy.init_node('image_seg', anonymous=True)
