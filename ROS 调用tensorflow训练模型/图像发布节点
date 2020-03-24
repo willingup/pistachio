@@ -44,7 +44,7 @@ def image_pub():
             frame = cv2.resize(frame,(640,480))  
             #图像的压缩，尺寸为（640,480）
             print(type(frame))
-            img_msg = bridge.cv2_to_imgmsg(frame, encoding="bgr8")  #ros转为cv
+            img_msg = bridge.cv2_to_imgmsg(frame, encoding="bgr8")  #OpenCV的图像转换为ROS的message格式
             pub.publish(img_msg)      
             #将img_msg发布出去
             print("[info]Publishing image now..")
