@@ -3,7 +3,9 @@ import rospy
 import numpy as np
 import tensorflow as tf
 import cv2
-import matplotlib.pyplot as plt
+
+import matplotlib.pyplot as plt  #python自带的画图软件
+
 from sensor_msgs.msg import Image
 from cv_bridge import CvBridge, CvBridgeError
 from tensorflow.python.framework import graph_util
@@ -44,7 +46,8 @@ def callback(data):
     count = count + 1
     if count == 1:
         count = 0
-        cv_img = bridge.imgmsg_to_cv2(data, "bgr8")
+        cv_img = bridge.imgmsg_to_cv2(data, "bgr8") #把ros型的图像转为cv
+       
     with tf.Session() as sess: # 下面开始做分割
         tf.global_variables_initializer().run()
         output_graph_def = tf.GraphDef()
@@ -67,12 +70,15 @@ def callback(data):
  
 def displaycamera():
     rospy.init_node('image_seg', anonymous=True)
- 
+    #初始化节点image_seg
+   
     global count,bridge
     count = 0
     bridge = CvBridge()
+    
     rospy.Subscriber('camera/image_raw', Image, callback)
+    #订阅之前发布的camera/image_raw节点，类型是Image,每次接收到消息，就会开一个新线程来呼叫callback
     rospy.spin()
- 
+    #spin()的功能是让程序在手动停止前一直循环,保持主进程一直循环
 if __name__ == '__main__':
     displaycamera()
