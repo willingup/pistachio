@@ -1,0 +1,16 @@
+#简单的两数相加 Variable知识
+import tensorflow as tf
+
+state = tf.Variable(0,name='counter') #定义一个Variable的值
+one = tf.constant(1)                  #定义一个常数量
+
+new_value = tf.add(state,one)
+update = tf.assign(state,new_value)
+
+init = tf.initialize_all_variables()  #如果定义了variable那么这句话是一定要写的
+
+with tf.Session() as sess:
+  sess.run(init)
+  for_in range(3):
+    sess.run(update)
+    print(sess.run(state))
