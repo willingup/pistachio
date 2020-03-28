@@ -1,0 +1,15 @@
+#提取定义的变量
+import tensorflow as tf 
+import numpy as np
+
+W = tf.Variable(np.arange(6).reshape((2,3),dtype = tf.float32,name = 'weights'))
+b = tf.Variable(np.arange(3).reshape((1,3),dtype = tf.float32,name = 'biases'))
+#not need init step
+saver = tf.train.Saver()
+with tf.Session() as sess:
+    saver.restore(sess,"地址")
+    print("weights",sess.run(W))
+    print("biases",sess.run(b))
+ 
+PS：训练完成之后，我们想把所有变量值和网络图保存到文件中方便以后使用。
+    所以，为了保存Tensorflow中的图和所有参数的值，我们创建一个tf.train.Saver()类的实例
