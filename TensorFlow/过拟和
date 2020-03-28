@@ -1,0 +1,4 @@
+#过拟合
+keep_pro = tf.placeholder(tf.float32) #保证多少结果不被撞掉
+sess.run(train_step,feed_dict={xs:X_train,ys:y_train,keep_pro:0.6}) #用在这个地方
+Wx_plus_b = tf.nn.dropout(Wx_plus_b,keep_prob)
