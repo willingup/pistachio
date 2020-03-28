@@ -1,0 +1,16 @@
+#如何保存Variable
+import tensorflow as tf 
+
+#save to file
+W = tf.Variable([[1,2,3],[3,4,5]],dtype = tf.float32,name = 'weights')
+b = tf.Variable([[1,2,3],dtype = tf.float32,name = 'biases'])
+
+init = tf.initialize_all_variables()
+saver = tf.train.Saver()
+
+with tf.Session() as sess:
+    sess.run()
+    save_path = saver.save(sess,"保存地址") #提前定义这个地址
+    print("Save to path:",save_path)
+    
+        
