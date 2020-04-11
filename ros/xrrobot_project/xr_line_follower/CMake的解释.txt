@@ -1,0 +1,39 @@
+#版本要求
+cmake_minimum_required(VERSION 2.8.3)
+#工程名字
+project(ros_tutorials_topic)
+#添加依赖包message_generation  roscpp  std_msgs
+find_package(catkin REQUIRED COMPONENTS
+  message_generation
+  roscpp
+  std_msgs
+)
+#声明msg文件夹下的消息文件MsgTutorial.msg
+add_message_files(
+   FILES 
+   MsgTutorial.msg
+ )
+#设置依赖性消息
+generate_messages(
+   DEPENDENCIES
+   std_msgs
+ )
+#catkin功能包选项，描述库、catkin构建依赖项和系统依赖的功能包
+catkin_package(
+
+  LIBRARIES ros_tutorials_topic
+  CATKIN_DEPENDS roscpp std_msgs
+)
+#设置包含目录
+include_directories(
+  ${catkin_INCLUDE_DIRS}
+)
+#配置可执行文件、目标链接库和其他依赖性
+add_executable(topic_publisher src/topic_publisher.cpp)
+add_dependencies(topic_publisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(topic_publisher ${catkin_LIBRARIES})
+
+#配置可执行文件、目标链接库和其他依赖性
+add_executable(topic_subscriber src/topic_subscriber.cpp)
+add_dependencies(topic_subscriber ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+target_link_libraries(topic_subscriber ${catkin_LIBRARIES})
