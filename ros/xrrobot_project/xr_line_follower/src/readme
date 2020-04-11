@@ -1,0 +1,7 @@
+#下面两个是检测图像的作用，在detect.cpp中调用linecetect.cpp中的函数
+linedetect.cpp
+detect.cpp
+
+#下面两个是控制机器人的作用，在motion_node.cpp调用rikirobot.cpp中的函数
+motion_node.cpp
+rikirobot.cpp
