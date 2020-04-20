@@ -19,18 +19,25 @@ generate_messages(
    std_msgs
  )
 #catkin功能包选项，描述库、catkin构建依赖项和系统依赖的功能包
+#This is required to specify catkin-specific information to the build system which in turn is used to generate pkg-config and #CMake files.
+
 catkin_package(
 
   LIBRARIES ros_tutorials_topic
   CATKIN_DEPENDS roscpp std_msgs
 )
-#设置包含目录
+#设置包含路径
 include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 #配置可执行文件、目标链接库和其他依赖性
+#specify libraries to build
 add_executable(topic_publisher src/topic_publisher.cpp)
+
+#To specify an executable target that must be built
 add_dependencies(topic_publisher ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+
+#to specify which libraries an executable target links against.
 target_link_libraries(topic_publisher ${catkin_LIBRARIES})
 
 #配置可执行文件、目标链接库和其他依赖性
