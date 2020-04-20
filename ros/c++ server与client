@@ -1,0 +1,80 @@
+#地址是https://wiki.ros.org/roscpp_tutorials/Tutorials/WritingServiceClient
+##########################################################################
+   1 #include "ros/ros.h"
+   2 #include "beginner_tutorials/AddTwoInts.h"
+   3 
+   4 bool add(beginner_tutorials::AddTwoInts::Request  &req,
+   5          beginner_tutorials::AddTwoInts::Response &res)
+   6 {
+   7   res.sum = req.a + req.b;
+   8   ROS_INFO("request: x=%ld, y=%ld", (long int)req.a, (long int)req.b);
+   9   ROS_INFO("sending back response: [%ld]", (long int)res.sum);
+  10   return true;
+  11 }
+  12 
+  13 int main(int argc, char **argv)
+  14 {
+  15   ros::init(argc, argv, "add_two_ints_server");
+  16   ros::NodeHandle n;
+  17 
+  18   ros::ServiceServer service = n.advertiseService("add_two_ints", add);
+  19   ROS_INFO("Ready to add two ints.");
+  20   ros::spin();
+  21 
+  22   return 0;
+  23 }
+  ########################################################################################################
+   1 #include "ros/ros.h"
+   2 #include "beginner_tutorials/AddTwoInts.h"
+   3 #include <cstdlib>
+   4 
+   5 int main(int argc, char **argv)
+   6 {
+   7   ros::init(argc, argv, "add_two_ints_client");
+   8   if (argc != 3)
+   9   {
+  10     ROS_INFO("usage: add_two_ints_client X Y");
+  11     return 1;
+  12   }
+  13 
+  14   ros::NodeHandle n;
+  15   ros::ServiceClient client = n.serviceClient<beginner_tutorials::AddTwoInts>("add_two_ints");
+  16   beginner_tutorials::AddTwoInts srv;
+  17   srv.request.a = atoll(argv[1]);
+  18   srv.request.b = atoll(argv[2]);
+  19   if (client.call(srv))
+  20   {
+  21     ROS_INFO("Sum: %ld", (long int)srv.response.sum);
+  22   }
+  23   else
+  24   {
+  25     ROS_ERROR("Failed to call service add_two_ints");
+  26     return 1;
+  27   }
+  28 
+  29   return 0;
+  30 }
+  ######################################################################################################
+  在CMAKELIST.txt 中添加的内容
+  27 add_executable(add_two_ints_server src/add_two_ints_server.cpp)
+  28 target_link_libraries(add_two_ints_server ${catkin_LIBRARIES})
+  29 add_dependencies(add_two_ints_server beginner_tutorials_gencpp)
+  30 
+  31 add_executable(add_two_ints_client src/add_two_ints_client.cpp)
+  32 target_link_libraries(add_two_ints_client ${catkin_LIBRARIES})
+  33 add_dependencies(add_two_ints_client beginner_tutorials_gencpp)
+  #######################################################################################################
+  编译
+  # In your catkin workspace
+    cd ~/catkin_ws
+    catkin_make
+  #######################################################################################################
+  roscore
+  ############################
+  Running the Server
+  rosrun beginner_tutorials add_two_ints_server
+  ##################################################
+  Running the Client
+  rosrun beginner_tutorials add_two_ints_server
+  ##################################################
+  输出结果4
