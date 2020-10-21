@@ -43,7 +43,7 @@ int LineDetect::colorthresh(cv::Mat input) {
   auto c_x = 0.0;
   
   // Detect all objects within the HSV range 检测HSV范围RGBToHSV内的所有对象
-  //色彩空间的转化
+  //从rgb8颜色空间转换到HSV颜色空间
   cv::cvtColor(input, LineDetect::img_hsv, CV_BGR2HSV);
   
   //利用颜色范围区分检测的物体
@@ -55,6 +55,8 @@ int LineDetect::colorthresh(cv::Mat input) {
 
   //LineDetect::LowerYellow = {20, 100, 100};
   //LineDetect::UpperYellow = {30, 255, 255};
+  
+  //cv::inRange 类似于阈值分割
   cv::inRange(LineDetect::img_hsv, LowerYellow,UpperYellow, LineDetect::img_mask);
 
   //cv::inRange(LineDetect::img_hsv, LowerBlack,
